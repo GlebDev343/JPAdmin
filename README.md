@@ -96,24 +96,26 @@ public class Product {
 
 JPAdmin provides several custom Hibernate `UserType` implementations for handling non-standard database types:
 
-- `BooleanType` → BOOLEAN
-- `DateType` → DATE
-- `DoubleType` → DOUBLE PRECISION
-- `EnumType` → ENUM
-- `FloatType` → FLOAT
-- `HstoreType` → HSTORE
-- `InstantType` → TIMESTAMP
+- `BitStringType` → BIT(n)
+- `BitVaryingType`→ BIT VARYING(n)
+- `BoxType` → BOX
+- `CidrType` → CIDR
+- `CircleType` → CIRCLE
+- `InetType` → INET
 - `IntervalStringType` → INTERVAL
+- `LineStringType` → LINE
 - `JsonBinaryType` → JSONB
 - `JsonStringType` → JSON
-- `LocalDateStringType` → DATE
-- `LocalDateTimeStringType` → TIMESTAMP
-- `LocalTimeStringType` → TIME
-- `LongType` → BIGINT
-- `OffsetDateTimeStringType` → TIMESTAMP WITH TIME ZONE
-- `ShortType` → SMALLINT
-- `StringType` → VARCHAR/TEXT
-- `UuidType` → UUID
+- `LsegStringType` → LSEG
+- `MacaddrStringType` → MACADDR
+- `OffsetTimeType` → TIMETZ
+- `PathStringType` → PATH
+- `PgLsnStringType` → PG_LSN
+- `PointStringType` → POINT
+- `PolygonStringType` → POLYGON
+- `TsqueryStringType` → TSQUERY
+- `TsvectorStringType` → TSVECTOR
+- `TxidSnapshotStringType` → TXID_SNAPSHOT
 
 ## Customization
 
