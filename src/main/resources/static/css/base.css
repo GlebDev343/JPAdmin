@@ -1,0 +1,177 @@
+/* Базовые стили для всего сайта */
+body {
+    background-color: #f5f5f5;
+    color: #333333;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.table-container,
+.records-table-container,
+.create-form,
+.edit-form,
+.error-container,
+.container {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+}
+
+.table-button,
+.create-button,
+.view-button,
+.edit-button,
+.save-button,
+.cancel-button,
+.add-filter-btn,
+.child-table-btn,
+.back-button {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.table-button:hover,
+.create-button:hover,
+.view-button:hover,
+.edit-button:hover,
+.save-button:hover,
+.cancel-button:hover,
+.add-filter-btn:hover,
+.child-table-btn:hover,
+.back-button:hover {
+    background: linear-gradient(135deg, #2980b9, #1f6391);
+    transform: translateY(-2px);
+}
+
+.save-button {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.save-button:hover {
+    background: linear-gradient(135deg, #27ae60, #219653);
+}
+
+.edit-button {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+.edit-button:hover {
+    background: linear-gradient(135deg, #d35400, #b34900);
+}
+
+.view-button {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.view-button:hover {
+    background: linear-gradient(135deg, #8e44ad, #7d3c98);
+}
+
+.cancel-button {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
+
+.cancel-button:hover {
+    background: linear-gradient(135deg, #7f8c8d, #6c7778);
+}
+
+.records-table,
+.create-table,
+.edit-table,
+.record-details-table {
+    background-color: #fafafa;
+}
+
+.records-table th,
+.create-table th,
+.edit-table th,
+.record-details-table th {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    color: #ffffff;
+}
+
+.records-table tr:nth-child(even),
+.create-table tr:nth-child(even),
+.edit-table tr:nth-child(even),
+.record-details-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+:root.dark-theme body {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+}
+
+:root.dark-theme h1,
+:root.dark-theme h2 {
+    color: #ecf0f1;
+}
+
+:root.dark-theme .table-container,
+:root.dark-theme .records-table-container,
+:root.dark-theme .create-form,
+:root.dark-theme .edit-form,
+:root.dark-theme .error-container,
+:root.dark-theme .container {
+    background-color: #34495e;
+    border: 1px solid #4a6781;
+}
+
+:root.dark-theme .records-table,
+:root.dark-theme .create-table,
+:root.dark-theme .edit-table,
+:root.dark-theme .record-details-table {
+    background-color: #3a536b;
+}
+
+:root.dark-theme .records-table tr:nth-child(even),
+:root.dark-theme .create-table tr:nth-child(even),
+:root.dark-theme .edit-table tr:nth-child(even),
+:root.dark-theme .record-details-table tr:nth-child(even) {
+    background-color: #415d7a;
+}
+
+.no-records-message {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+    font-size: 16px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin: 20px 0;
+}
+
+:root.dark-theme .no-records-message {
+    color: #bdc3c7;
+    background-color: #34495e;
+    border: 1px solid #4a6781;
+}
+
+.nullable-indicator {
+    margin-left: 5px;
+    color: #e67e22;
+    font-weight: bold;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');

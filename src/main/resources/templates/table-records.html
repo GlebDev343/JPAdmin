@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Records - ' + ${tableName}">Records</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/table-records.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script th:src="@{/js/init-filters.js}"></script>
+    <style>
+        .timezone-input {
+            width: 80px;
+            margin-left: 5px;
+            padding: 2px;
+        }
+    </style>
+</head>
+<body>
+<div class="records-table-container">
+    <h1 th:text="'Records in ' + ${tableName}"></h1>
+
+    <div id="fieldTypesData" th:attr="data-field-types=${fieldTypesJson}" style="display: none;"></div>
+    <div id="fieldsData" th:attr="data-fields=${#strings.listJoin(filterFieldsSet, ',')}" style="display: none;"></div>
+
+    <form id="filterForm" th:action="@{'/admin/table/' + ${tableName}}" method="get">
+        <div class="filter-section">
+            <h2>Filters</h2>
+            <div id="filterContainer">
+                <div class="filter-row" th:each="filter : ${filters}">
+                    <select name="filterField" th:value="${filter.field}" onchange="updateFilterOptions(this)">
+                        <option th:each="field : ${filterFieldsSet}" th:value="${field}" th:text="${field}" th:selected="${field == filter.field}"></option>
+                    </select>
+                    <select name="filterOperation" th:attr="data-operation=${filter.operation}" onchange="updateFilterControls(this.previousElementSibling, this)">
+                        <!-- Пустой список, заполняется JS -->
+                    </select>
+                    <div class="value-container">
+                        <input type="text" name="filterValue"
+                               th:value="${filter.value != null ? (filter.value.contains('+') ? filter.value.substring(0, filter.value.lastIndexOf('+')) : (filter.value.endsWith('Z') ? filter.value.substring(0, filter.value.length() - 1) : filter.value)) : ''}"
+                               th:attr="data-flatpickr-value=${filter.value}"
+                               class="filter-value-text" placeholder="Value"
+                               th:classappend="${filter.value != null ? 'applied' : ''}">
+                        <span class="calendar-icon" style="display: none;"><i class="fas fa-calendar-alt"></i></span>
+                        <input type="text" name="timezoneValue" class="timezone-input" style="display: none;"
+                               placeholder="Timezone (e.g. +03:00, Z)"
+                               th:value="${filter.value != null and filter.value.contains('+') ? filter.value.substring(filter.value.lastIndexOf('+')) : (filter.value != null and filter.value.endsWith('Z') ? 'Z' : '')}">
+                    </div>
+                    <label class="allow-null" th:unless="${filter.operation == 'is null' or filter.operation == 'is not null'}">
+                        <input type="checkbox" name="allowNull" value="true" th:checked="${filter.containsKey('allowNull') ? filter.allowNull == 'true' : false}"> Allow NULL
+                    </label>
+                    <label class="empty-string"><input type="checkbox" name="treatEmptyAsEmptyString" value="true" th:checked="${filter.treatEmptyAsEmptyString == 'true'}" onchange="updateFilterControls(this.parentElement.previousElementSibling.previousElementSibling, this.parentElement.previousElementSibling)"> Empty String</label>
+                    <button type="button" onclick="this.parentElement.remove()">Remove</button>
+                </div>
+            </div>
+            <button type="button" id="add-filter-btn" class="add-filter-btn" onclick="addFilter()">Add Filter</button>
+        </div>
+
+        <div class="sort-section">
+            <h2>Sort</h2>
+            <select name="sortField" class="sort-field" th:classappend="${sortField != null ? 'applied' : ''}">
+                <option value="" th:text="'None'"></option>
+                <option th:each="field : ${filterFieldsSet}" th:value="${field}" th:text="${field}" th:selected="${field == sortField}"></option>
+            </select>
+            <select name="sortOrder" class="sort-order">
+                <option value="ASC" th:selected="${sortOrder == 'ASC'}" th:text="'Ascending'"></option>
+                <option value="DESC" th:selected="${sortOrder == 'DESC'}" th:text="'Descending'"></option>
+            </select>
+            <select name="nullsFirst" class="nulls-first">
+                <option value="true" th:selected="${nullsFirst == true}" th:text="'Nulls First'"></option>
+                <option value="false" th:selected="${nullsFirst == false}" th:text="'Nulls Last'"></option>
+            </select>
+        </div>
+
+        <div class="size-section">
+            <label for="sizeSelect">Records per page:</label>
+            <select id="sizeSelect" name="size" onchange="this.form.submit()">
+                <option value="5" th:selected="${pageSize == 5}">5</option>
+                <option value="10" th:selected="${pageSize == 10}">10</option>
+                <option value="20" th:selected="${pageSize == 20}">20</option>
+                <option value="50" th:selected="${pageSize == 50}">50</option>
+            </select>
+        </div>
+
+        <input type="hidden" id="pageInput" name="page" th:value="${currentPage}">
+        <button type="button" class="apply-button" onclick="applyFilters()">Apply</button>
+    </form>
+
+    <div class="table-wrapper">
+        <table class="records-table">
+            <thead>
+            <tr>
+                <!-- Отображаем заголовки для всех полей из simpleFields -->
+                <th th:each="field : ${simpleFields}"
+                    th:text="${displayNames.get(field)}"></th>
+                <th class="actions-header">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="record : ${records}">
+                <td th:each="field : ${simpleFields}">
+                    <!-- Для embedded полей -->
+                    <span th:if="${embeddedFieldPaths.containsKey(field)}"
+                          th:text="${record.get(field) != null ? record.get(field) : 'NULL'}"></span>
+                    <!-- Для простых и вычисляемых полей, исключая отношения -->
+                    <span th:unless="${embeddedFieldPaths.containsKey(field) or foreignKeyFields.containsKey(field) or oneToManyFields.containsKey(field) or manyToManyFields.containsKey(field)}"
+                          th:text="${record.get(field) != null ? record.get(field) : 'NULL'}"></span>
+                </td>
+                <td class="actions-column">
+                    <a th:href="@{'/admin/table/' + ${tableName} + '/' + ${record.get('id')}}" class="view-button">View</a>
+                    <a th:href="@{'/admin/table/' + ${tableName} + '/' + ${record.get('id')} + '/edit'}" class="edit-button">Edit</a>
+                </td>
+            </tr>
+            <tr th:if="${records == null or #lists.isEmpty(records)}">
+                <td th:colspan="${simpleFields.size() + 1}" class="no-records-message">No records found.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <a th:href="@{'/admin/table/' + ${tableName} + '?page=' + ${currentPage - 1} + '&size=' + ${pageSize} + '&sortField=' + ${sortField} + '&sortOrder=' + ${sortOrder} + '&nullsFirst=' + ${nullsFirst}}"
+           th:classappend="${currentPage <= 0 ? 'disabled' : ''}" th:text="'Previous'"></a>
+        <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:href="@{'/admin/table/' + ${tableName} + '?page=' + ${i} + '&size=' + ${pageSize} + '&sortField=' + ${sortField} + '&sortOrder=' + ${sortOrder} + '&nullsFirst=' + ${nullsFirst}}"
+               th:text="${i + 1}"
+               th:classappend="${i == currentPage ? 'active' : ''}"></a>
+        </span>
+        <a th:href="@{'/admin/table/' + ${tableName} + '?page=' + ${currentPage + 1} + '&size=' + ${pageSize} + '&sortField=' + ${sortField} + '&sortOrder=' + ${sortOrder} + '&nullsFirst=' + ${nullsFirst}}"
+           th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}" th:text="'Next'"></a>
+    </div>
+
+    <a th:href="@{'/admin/table/' + ${tableName} + '/create'}" class="create-button">Create New Record</a>
+    <a th:href="@{/admin}" class="back-button">Back to Tables</a>
+</div>
+</body>
+</html>

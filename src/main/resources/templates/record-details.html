@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Record Details - ' + ${tableName}">Record Details</title>
+    <link rel="stylesheet" th:href="@{/css/record-details.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+</head>
+<body>
+<div class="container">
+    <div class="main-content">
+        <h1 th:text="'Record Details in ' + ${tableName}"></h1>
+        <!-- Flash-сообщения -->
+        <div th:if="${successMessage}" class="success-message" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+
+        <table class="details-table">
+            <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="field : ${fields}"
+                th:unless="${oneToManyFields.containsKey(field) or manyToManyFields.containsKey(field)}">
+                <td th:text="${displayNames != null ? displayNames.get(field) : field}"></td>
+                <td th:text="${fieldTypes.get(field)}"></td>
+                <td>
+                    <!-- Для внешних ключей (OneToOne) -->
+                    <span th:if="${foreignKeyFields.containsKey(field) and record.get(field) != null}">
+                        <a th:href="${record.get(field + '_link')}" th:text="${record.get(field)}"></a>
+                    </span>
+                    <!-- Для простых полей -->
+                    <span th:unless="${foreignKeyFields.containsKey(field)}"
+                          th:text="${record.get(field) != null ? record.get(field) : 'NULL'}"></span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(fields)}">
+                <td colspan="3">No fields available.</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="actions">
+            <a th:href="@{'/admin/table/' + ${tableName} + '/' + ${record.get('id')} + '/edit'}" class="edit-button">Edit</a>
+            <a th:href="@{'/admin/table/' + ${tableName}}" class="back-button">Back to Table</a>
+        </div>
+    </div>
+
+    <!-- Sidebar для дочерних таблиц -->
+    <div class="sidebar">
+        <h2>Related Tables</h2>
+        <div class="related-tables">
+            <!-- OneToMany -->
+            <th:block th:each="field : ${fields}">
+                <a th:if="${oneToManyFields.containsKey(field) and record.get('id') != null and childTables.containsKey(field)}"
+                   th:href="${childTables.get(field).get('link')}"
+                   th:text="${field}"
+                   class="child-table-btn"></a>
+            </th:block>
+            <!-- ManyToMany -->
+            <th:block th:each="field : ${fields}">
+                <a th:if="${manyToManyFields.containsKey(field) and record.get('id') != null and childTables.containsKey(field)}"
+                   th:href="${childTables.get(field).get('link')}"
+                   th:text="${field}"
+                   class="child-table-btn"></a>
+            </th:block>
+            <div th:if="${#maps.isEmpty(oneToManyFields) and #maps.isEmpty(manyToManyFields)}" class="no-records-message">
+                No related tables available.
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

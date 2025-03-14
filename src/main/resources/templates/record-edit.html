@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="'Edit Record - ' + ${tableName}">Edit Record</title>
+  <link rel="stylesheet" th:href="@{/css/record-edit.css}">
+  <link rel="stylesheet" th:href="@{/css/base.css}">
+</head>
+<body>
+<div class="container">
+  <div class="main-content">
+    <h1 th:text="'Edit Record in ' + ${tableName}"></h1>
+    <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="success-message" th:text="${successMessage}"></div>
+    <form th:action="@{'/admin/table/' + ${tableName} + '/' + ${record.get('id')} + '/edit'}" method="post">
+      <table class="edit-table">
+        <thead>
+        <tr>
+          <th>Field</th>
+          <th>Type</th>
+          <th>Value</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="field : ${simpleFields}"
+            th:unless="${field == 'id' or foreignKeyFields.containsKey(field) or not fields.contains(field)}">
+          <td th:text="${field}"></td>
+          <td>
+            <span th:text="${fieldTypes.get(field)}"></span>
+            <span th:if="${nullableFields.get(field) == true}" class="nullable-indicator" title="Nullable">N</span>
+          </td>
+          <td>
+            <th:block th:switch="${fieldTypes.get(field)}">
+              <th:case th:case="'Boolean'">
+                <select class="edit-select" th:name="${field}">
+                  <option value="true" th:selected="${param[field] == 'true' or (param[field] == null and record.get(field) == true)}" th:text="'True'"></option>
+                  <option value="false" th:selected="${param[field] == 'false' or (param[field] == null and record.get(field) == false)}" th:text="'False'"></option>
+                  <option th:if="${nullableFields.get(field) == true}" value="null" th:selected="${param[field] == 'null' or (param[field] == null and record.get(field) == null)}" th:text="'Null'"></option>
+                </select>
+              </th:case>
+              <th:case th:case="*">
+                <input type="text" class="edit-input" th:name="${field}" th:value="${param[field] != null ? param[field] : record.get(field)}">
+              </th:case>
+            </th:block>
+            <span th:if="${validationErrors != null and validationErrors.get(field) != null}"
+                  class="field-error" th:text="${validationErrors.get(field)}"></span>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(simpleFields)}">
+          <td colspan="3">No editable fields available.</td>
+        </tr>
+        </tbody>
+      </table>
+      <div class="actions">
+        <button type="submit" class="save-button">Save</button>
+        <a th:href="@{'/admin/table/' + ${tableName} + '/' + ${record.get('id')}}" class="cancel-button">Cancel</a>
+      </div>
+    </form>
+    <a th:href="@{'/admin/table/' + ${tableName}}" class="back-button">Back to Table</a>
+  </div>
+</div>
+</body>
+</html>

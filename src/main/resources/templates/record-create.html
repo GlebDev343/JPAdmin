@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Create Record - ' + ${tableName}">Create Record</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/record-create.css}">
+</head>
+<body>
+<div class="container">
+    <div class="main-content">
+        <h1 th:text="'Create New Record in ' + ${tableName}"></h1>
+        <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+        <div th:if="${successMessage}" class="success-message" th:text="${successMessage}"></div>
+        <form th:action="@{'/admin/table/' + ${tableName} + '/create'}" method="post">
+            <table class="create-table">
+                <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Исключаем id и коллекции, защищаем от null -->
+                <tr th:each="field : ${fields}"
+                    th:unless="${field == 'id' or (isCollectionField != null ? isCollectionField.get(field) != null ? isCollectionField.get(field) : false : false)}">
+                    <td th:text="${displayNames != null && displayNames.get(field) != null ? displayNames.get(field) : field}"></td>
+                    <td>
+                        <span th:text="${fieldTypes.get(field) != null ? fieldTypes.get(field) : 'Unknown'}"></span>
+                        <span th:if="${nullableFields.get(field) == true}" class="nullable-indicator" title="Nullable">N</span>
+                    </td>
+                    <td>
+                        <div th:switch="${fieldTypes.get(field)}">
+                            <!-- Boolean с выпадающим списком -->
+                            <div th:case="'Boolean'">
+                                <select class="create-select" th:name="${field}">
+                                    <option value="true" th:selected="${param[field] == 'true'}" th:text="'True'"></option>
+                                    <option value="false" th:selected="${param[field] == 'false' or param[field] == null}" th:text="'False'"></option>
+                                    <option th:if="${nullableFields.get(field) == true}" value="" th:selected="${param[field] == ''}" th:text="'Null'"></option>
+                                </select>
+                            </div>
+                            <!-- Текстовый ввод для всех остальных типов -->
+                            <div th:case="*">
+                                <input type="text" class="create-input" th:name="${field}" th:value="${param[field]}">
+                            </div>
+                        </div>
+                        <span th:if="${validationErrors != null and validationErrors.get(field) != null}" class="field-error" th:text="${validationErrors.get(field)}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="actions">
+                <button type="submit" class="save-button">Save</button>
+                <a th:href="@{'/admin/table/' + ${tableName}}" class="cancel-button">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91fb5220aed912d2',t:'MTc0MTg2NjcwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('script');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

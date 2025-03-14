@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Tables</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/base.css}">
+</head>
+<body>
+<div class="table-container">
+  <h1>Available Tables</h1>
+  <ul class="table-list">
+    <li class="table-item" th:each="table : ${tables}">
+      <span class="table-name" th:text="${table.tableName}"></span>
+      <a th:href="@{'/admin/table/' + ${table.tableName}}" class="table-button">View Records</a>
+    </li>
+  </ul>
+</div>
+</body>
+</html>
